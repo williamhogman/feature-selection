@@ -59,6 +59,5 @@ def compute_meta_features(df):
 if __name__ == "__main__":
     basedata = get_data_for("T887")
     metafeatures = compute_meta_features(basedata)
-    features = features.df_to_features(basedata, {k: True for k in basedata.columns.values})
-    print(features.head())
-    print(metafeatures.head())
+    cache = dict()
+    features = features.df_to_features(basedata, {k: True for k in basedata.columns.values}, cache)
