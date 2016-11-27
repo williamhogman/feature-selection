@@ -1,5 +1,7 @@
 import pandas as pd
 
+import metafeatures
+
 DATA_DIRECTORY = "/media/veracrypt1/data"
 
 DIAG_CODES = [
@@ -42,10 +44,12 @@ path_for = "{0}/{1}-90-raw-measurements.csv".format
 def read_frame(diag_code):
     return pd.read_csv(path_for(DATA_DIRECTORY, diag_code))
 
-
 def get_data_for(diag_code):
     return read_frame(diag_code).pivot_table(index=["patientnr", "time"], columns="code", values="value")
 
+def compute_meta_features(df):
+    return metafeatures.compute_for(df, df.columns.values)
 
 if __name__ == "__main__":
-    print(get_data_for("T887").head())
+    data = compute_meta_features(get_data_for("T887"))
+    print(data.head())
