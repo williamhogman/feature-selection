@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 import metafeatures
@@ -87,12 +88,16 @@ def iter_all_tses(datasets):
 def build_meta_model_ys(datasets):
     last_basedata = None
     cache = None
+    i = 0
     for (basedata, ys, tsvar) in iter_all_tses(datasets):
-        if cache is None or basedata != last_basedata:
+        if cache is None or basedata is not last_basedata:
             cache = dict()
             last_basedata = basedata
         dfs = features.df_to_all_reprs(basedata, tsvar, cache)
         yield [build_and_evaluate(df, ys) for df in dfs]
+        i += 1
+        if i % 100 == 0:
+            print("i = {0}".format(i))
 
 
 def build_meta_model_xs(datasets):
@@ -114,10 +119,13 @@ def meta_build_and_evaluate(xs, ys):
 
 
 if __name__ == "__main__":
-    print("Building training set")
     TRAINING_FILES = ["T887"]
     data = [get_data_for(x) for x in TRAINING_FILES]
-    xs = list(build_meta_model_xs(data))
-    ys = list(build_meta_model_ys(data))
+    print("Building X-values for meta-model")
+    xs = np.array(list(build_meta_model_xs(data)))
+    np.save("meta-model-xs.npy", xs)
+    print("Building Y-values for meta-model")
+    ys = np.array(list(build_meta_model_ys(data)))
+    np.save("meta-model-ys.npy", ys)
     print("Building meta model")
     meta_build_and_evaluate(xs, ys)
