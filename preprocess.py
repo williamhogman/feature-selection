@@ -4,8 +4,8 @@ from sklearn.model_selection import train_test_split
 import metafeatures
 import features
 
-#DATA_DIRECTORY = "/media/veracrypt2/data"
-DATA_DIRECTORY = "data"
+DATA_DIRECTORY = "/media/veracrypt2/data"
+#DATA_DIRECTORY = "data"
 
 DIAG_CODES = [
     "D611",
@@ -78,18 +78,26 @@ def build_and_evaluate(features, ys):
     return evaluate_model(clf, x_test, y_test)
 
 
-def build_meta_model_ys(datasets):
+def iter_all_tses(datasets):
     for (basedata, ys) in datasets:
-        for i, tsvar in enumerate(basedata.columns.values):
+        for tsvar in basedata.columns.values:
+            yield basedata, ys, tsvar
+
+
+def build_meta_model_ys(datasets):
+    last_basedata = None
+    cache = None
+    for (basedata, ys, tsvar) in iter_all_tses(datasets):
+        if cache is None or basedata != last_basedata:
             cache = dict()
-            dfs = features.df_to_all_reprs(basedata, tsvar, cache)
-            yield [build_and_evaluate(df, ys) for df in dfs]
+            last_basedata = basedata
+        dfs = features.df_to_all_reprs(basedata, tsvar, cache)
+        yield [build_and_evaluate(df, ys) for df in dfs]
 
 
 def build_meta_model_xs(datasets):
-    for (basedata, ys) in datasets:
-        for tsvar in basedata.columns.values:
-            yield metafeatures.extract_meta_features_as_arr(basedata[tsvar])
+    for (basedata, ys, tsvar) in iter_all_tses(datasets):
+        yield metafeatures.extract_meta_features_as_arr(basedata[tsvar])
 
 
 def build_meta_model(xs, ys):
@@ -109,7 +117,7 @@ if __name__ == "__main__":
     print("Building training set")
     TRAINING_FILES = ["T887"]
     data = [get_data_for(x) for x in TRAINING_FILES]
-    xs = build_meta_model_xs(data)
-    ys = build_meta_model_ys(data)
+    xs = list(build_meta_model_xs(data))
+    ys = list(build_meta_model_ys(data))
     print("Building meta model")
     meta_build_and_evaluate(xs, ys)
