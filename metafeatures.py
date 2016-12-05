@@ -13,6 +13,11 @@ def extract_meta_features(timeseries):
     return {k: META_FEATURES[k](timeseries) for k in META_FEATURES}
 
 
+def extract_meta_features_as_arr(timeseries):
+    metas = extract_meta_features(timeseries)
+    return [metas[k] for k in sorted(metas)]
+
+
 def seq_of_timeseries_variable(df, cols):
     for col in cols:
         d = extract_meta_features(df[col])

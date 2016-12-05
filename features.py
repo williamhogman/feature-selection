@@ -1,4 +1,6 @@
+import itertools
 import pandas as pd
+
 
 
 def mean(x):
@@ -18,6 +20,12 @@ FEATURES = {
     "sd": sd,
     "count": count,
 }
+
+FEATURE_COMBINATIONS = list(itertools.chain.from_iterable(
+    itertools.combinations(FEATURES.keys(), i)
+    for i in range(1, len(FEATURES) + 1)
+))
+
 FEATURE_SEP = "_"
 
 
@@ -45,3 +53,10 @@ def df_to_features(orig, feature_mapping, cache=None):
         df.update(dict(ts_to_features(k, orig[k], feature_mapping[k], cache)))
 
     return pd.DataFrame(df)
+
+
+def df_to_all_reprs(orig, ts_under_test, cache=None):
+    features = {k: True for k in orig.columns.values if not k == ts_under_test}
+    for rep in FEATURE_COMBINATIONS:
+        features[ts_under_test] = rep
+        yield df_to_features(orig, features, cache)
