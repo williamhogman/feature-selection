@@ -1,12 +1,13 @@
 import pandas as pd
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 import metafeatures
 import features
 
 DATA_DIRECTORY = "/media/veracrypt2/data"
 #DATA_DIRECTORY = "data"
+DATA_DIRECTORY = "/volumes/NO NAME/data"
 
 DIAG_CODES = [
     "D611",
@@ -65,7 +66,7 @@ def accuracy(y_hat, y_test):
     return corr / float(total)
 
 def build_base_model(xs, ys):
-    clf = RandomForestClassifier(n_estimators=1, n_jobs=-1, max_features=None)
+    clf = RandomForestRegressor(n_estimators=1, n_jobs=-1, max_features=None)
     clf.fit(xs, ys)
     return clf
 
@@ -106,7 +107,7 @@ def build_meta_model_xs(datasets):
 
 
 def build_meta_model(xs, ys):
-    clf = RandomForestClassifier(n_estimators=1, n_jobs=-1, max_features=None)
+    clf = RandomForestRegressor(n_estimators=100, n_jobs=-1, max_features=None)
     clf.fit(xs, ys)
     return clf
 
@@ -114,18 +115,37 @@ def meta_build_and_evaluate(xs, ys):
     x_train, x_test, y_train, y_test = train_test_split(xs, ys)
     clf = build_meta_model(x_train, y_train)
     y_hat = clf.predict(x_test)
-    mean_squared_error = ((y_hat - y_test) ** 2).mean()
-    return mean_squared_error
+    return y_hat - y_test
+
+
+def get_meta_model_xs():
+    try:
+        return np.load("meta-model-ys.npy")
+    except:
+        data = [get_data_for(x) for x in TRAINING_FILES]
+        print("Building X-values for meta-model")
+
+        xs = np.array(list(build_meta_model_xs(data)))
+        np.save("meta-model-xs.npy", xs)
+        return xs
+
+
+def get_meta_model_ys():
+    try:
+        return np.load("meta-model-ys.npy")
+    except:
+        data = [get_data_for(x) for x in TRAINING_FILES]
+        print("Building Y-values for meta-model")
+        ys = np.array(list(build_meta_model_ys(data)))
+        np.save("meta-model-ys.npy", ys)
+        return ys
+
 
 
 if __name__ == "__main__":
     TRAINING_FILES = ["T887"]
-    data = [get_data_for(x) for x in TRAINING_FILES]
-    print("Building X-values for meta-model")
-    xs = np.array(list(build_meta_model_xs(data)))
-    np.save("meta-model-xs.npy", xs)
-    print("Building Y-values for meta-model")
-    ys = np.array(list(build_meta_model_ys(data)))
-    np.save("meta-model-ys.npy", ys)
+    xs = get_meta_model_xs()
+    ys = get_meta_model_ys()
+
     print("Building meta model")
-    meta_build_and_evaluate(xs, ys)
+    print(meta_build_and_evaluate(xs, ys))
