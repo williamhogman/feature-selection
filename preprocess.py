@@ -115,7 +115,7 @@ def meta_build_and_evaluate(xs, ys):
     x_train, x_test, y_train, y_test = train_test_split(xs, ys)
     clf = build_meta_model(x_train, y_train)
     y_hat = clf.predict(x_test)
-    return y_hat - y_test
+    return y_hat, y_train, ((y_hat - y_test) ** 2).mean()
 
 
 def get_meta_model_xs():
@@ -148,4 +148,6 @@ if __name__ == "__main__":
     ys = get_meta_model_ys()
 
     print("Building meta model")
-    print(meta_build_and_evaluate(xs, ys))
+    y_hat, y_train, meansquareerror = meta_build_and_evaluate(xs, ys)
+    print(y_train.mean(0))
+    print(y_hat.mean(0))
