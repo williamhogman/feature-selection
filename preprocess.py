@@ -118,9 +118,15 @@ def meta_build_and_evaluate(xs, ys):
     return y_hat, y_train, ((y_hat - y_test) ** 2).mean()
 
 
+def select_features_based_on_accuracy(accs):
+    return np.array([features.FEATURE_COMBINATIONS[int(x)]
+                     for x in accs.argmax(axis=1)])
+
+
 def get_meta_model_xs():
     try:
-        return np.load("meta-model-ys.npy")
+        abc = 1/0
+        return np.load("meta-model-xs.npy")
     except:
         data = [get_data_for(x) for x in TRAINING_FILES]
         print("Building X-values for meta-model")
@@ -149,5 +155,11 @@ if __name__ == "__main__":
 
     print("Building meta model")
     y_hat, y_train, meansquareerror = meta_build_and_evaluate(xs, ys)
-    print(y_train.mean(0))
-    print(y_hat.mean(0))
+    chosen = select_features_based_on_accuracy(y_hat)
+    actual = select_features_based_on_accuracy(y_train)
+    tot = 0
+    for i in range(len(chosen)):
+        print(chosen[i], actual[i])
+        if chosen == actual:
+            tot += 1
+    print tot
