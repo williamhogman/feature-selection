@@ -6,9 +6,9 @@ import metafeatures
 import features
 from constants import DIAG_CODES, TRAINING_FILES
 
-DATA_DIRECTORY = "/media/veracrypt2/data"
-#DATA_DIRECTORY = "data"
-DATA_DIRECTORY = "/volumes/NO NAME/data"
+#DATA_DIRECTORY = "/media/veracrypt2/data"
+DATA_DIRECTORY = "data"
+#DATA_DIRECTORY = "/volumes/NO NAME/data"
 
 TEST_FILES = [x for x in DIAG_CODES if x not in TRAINING_FILES]
 
@@ -79,7 +79,8 @@ def build_meta_model_xs(datasets):
 
 def build_meta_model(xs, ys):
     clf = RandomForestRegressor(n_estimators=META_MODEL_N_ESTIMATORS, n_jobs=-1, max_features=None)
-    clf.fit(xs, ys)
+    print(np.isnan(xs).sum())
+    clf.fit(np.nan_to_num(xs), ys)
     return clf
 
 def meta_build_and_evaluate(xs, ys):
