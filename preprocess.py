@@ -14,8 +14,8 @@ TEST_FILES = [x for x in DIAG_CODES if x not in TRAINING_FILES]
 
 path_for = "{0}/{1}-90-raw-measurements.csv".format
 
-BASE_MODEL_N_ESTIMATORS = 1
-META_MODEL_N_ESTIMATORS = 1
+BASE_MODEL_N_ESTIMATORS = 100
+META_MODEL_N_ESTIMATORS = 100
 
 
 def read_frame(diag_code):
