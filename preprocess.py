@@ -7,8 +7,8 @@ import features
 from constants import DIAG_CODES, TRAINING_FILES
 
 #DATA_DIRECTORY = "/media/veracrypt2/data"
-DATA_DIRECTORY = "data"
-#DATA_DIRECTORY = "/volumes/NO NAME/data"
+#DATA_DIRECTORY = "data"
+DATA_DIRECTORY = "/volumes/NO NAME/data"
 
 TEST_FILES = [x for x in DIAG_CODES if x not in TRAINING_FILES]
 
@@ -80,7 +80,8 @@ def build_meta_model_xs(datasets):
 def build_meta_model(xs, ys):
     clf = RandomForestRegressor(n_estimators=META_MODEL_N_ESTIMATORS, n_jobs=-1, max_features=None)
     print(np.isnan(xs).sum())
-    clf.fit(np.nan_to_num(xs), ys)
+    print(np.isnan(ys).sum())
+    clf.fit(np.nan_to_num(xs.astype("float32")), ys)
     return clf
 
 def meta_build_and_evaluate(xs, ys):
@@ -141,7 +142,7 @@ def meta_model_train_all_run():
 
 def pick_representation_for_ts(basedata, tsvar, clf):
     metas = metafeatures.extract_meta_features_as_arr(basedata[tsvar])
-    return select_features_based_on_accuracy(clf.predict([metas]))[0]
+    return select_features_based_on_accuracy(clf.predict([np.nan_to_num(metas)]))[0]
 
 
 def make_smart_xs(basedata, clf):
@@ -159,10 +160,10 @@ def make_naive_xs(basedata):
 
 def get_experiments(clf, files):
     for (basedata, ys) in [get_data_for(x) for x in files]:
+        print("hey")
         smart_xs = make_smart_xs(basedata, clf)
-        naive_xs = make_navive_xs(basedata)
+        naive_xs = make_naive_xs(basedata)
         yield (naive_xs, smart_xs, ys)
-
 
 
 def generate_comparison(naive_results, smart_results):
@@ -173,6 +174,7 @@ def generate_comparison(naive_results, smart_results):
 
 def run_experiments(experiments):
     for naive_xs, smart_xs, ys in experiments:
+        print("yodawg")
         yield generate_comparison(build_and_evaluate(naive_xs, ys),
                                   build_and_evaluate(smart_xs, ys))
 
