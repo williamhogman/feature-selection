@@ -162,22 +162,27 @@ def get_experiments(clf, files):
     for (basedata, ys) in [get_data_for(x) for x in files]:
         print("hey")
         smart_xs = make_smart_xs(basedata, clf)
+        print("yo")
         naive_xs = make_naive_xs(basedata)
         yield (naive_xs, smart_xs, ys)
 
 
-def generate_comparison(naive_results, smart_results):
+def generate_comparison(naive_results, smart_results,
+                        naive_features, smart_features):
     return dict(naive=naive_results,
                 smart=smart_results,
-                delta=(naive_results - smart_results))
+                delta=(smart_results - naive_results),
+                naive_features=naive_features,
+                smart_features=smart_features)
 
 
 def run_experiments(experiments):
     for naive_xs, smart_xs, ys in experiments:
         print("yodawg")
         yield generate_comparison(build_and_evaluate(naive_xs, ys),
-                                  build_and_evaluate(smart_xs, ys))
-
+                                  build_and_evaluate(smart_xs, ys),
+                                  naive_xs.shape[1],
+                                  smart_xs.shape[1])
 
 def run_evaluation_procedure():
     clf = meta_model_train_all_run()

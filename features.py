@@ -2,7 +2,6 @@ import itertools
 import pandas as pd
 
 
-
 def mean(x):
     return x.mean()
 
